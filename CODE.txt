@@ -1,0 +1,74 @@
+#include <16F72.h>
+#use        delay  (clock=20000000)
+#use        rs232  (baud = 9600, xmit=PIN_B1,rcv=PIN_B0,stream=BT)  //New RFID Reader baudrate
+
+#include <flex_lcd.c> 
+int i;
+char data[17];
+char ch;
+
+
+void main()
+{  
+
+   lcd_init();
+   
+   lcd_putc('\f');         //Clear LCD 
+   lcd_gotoxy(1,1);
+   printf(lcd_putc," LoRa Data");
+   lcd_gotoxy(1,2);
+   printf(lcd_putc,"Transmission");
+   
+   output_high(PIN_C4);    
+   output_high(PIN_C3);
+    delay_ms(500);   
+    output_low(PIN_C4);
+    output_low(PIN_C3);
+    delay_ms(500);   
+   output_high(PIN_C4);    
+   output_high(PIN_C3);
+    delay_ms(500);   
+    output_low(PIN_C4);
+    output_low(PIN_C3);
+   fprintf(BT," *message# to enter new message\r\n");
+   
+   
+    while(1)
+    {      
+         
+         ch = fgetc(BT);
+         
+         if(ch == '*')
+         {
+            i = 0;
+            while(1)
+            {
+               ch = fgetc(BT);
+               data[i] = ch;
+               
+               if(ch == '#')
+               break;
+               
+               i++;
+            }
+            
+            data[i] = 0;
+            
+            output_high(PIN_C4);    
+            output_high(PIN_C3);
+            delay_ms(2000);   
+            
+            lcd_putc('\f');         //Clear LCD 
+            lcd_gotoxy(1,1);
+            printf(lcd_putc,"Received:");
+            lcd_gotoxy(1,2);
+            printf(lcd_putc,"%s",data);
+            
+            output_low(PIN_C4);
+            output_low(PIN_C3);
+                                 
+         }
+         
+      delay_ms(70);
+    }
+}
